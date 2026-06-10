@@ -1,0 +1,27 @@
+.app-header {
+  padding: 1rem;
+  background-color: #333;
+  color: white;
+}
+
+.app-header h1 {
+  margin: 000.75rem 0;
+}
+
+.app-header nav {
+  display:flex;
+  gap: 1rem;
+}
+
+.app-header a {
+  color: white;
+  text-decoration: none;
+}
+
+.app-header a:hover {
+  text-decoration: underline;
+}
+
+.app-content {
+  padding: 1rem;
+}
