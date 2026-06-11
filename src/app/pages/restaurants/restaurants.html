@@ -1,0 +1,20 @@
+<h2>Restaurants</h2>
+
+<p>Hier werden Restaurants aus dem Backend geladen.</p>
+
+@if (restaurants$ | async; as restaurants) {
+  @if (restaurants.length === 0) {
+    <p>Keine Restaurants gefunden.</p>
+  }
+
+  <ul>
+    @for (restaurant of restaurants; track restaurant.id) {
+      <li>
+        <a [routerLink]="['/restaurants', restaurant.id, 'menu']">
+          <strong>{{ restaurant.name }}</strong>
+        </a><br>
+        {{ restaurant.street }}, {{ restaurant.postalCode }} {{ restaurant.city }}
+      </li>
+    }
+  </ul>
+}

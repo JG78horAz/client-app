@@ -1,0 +1,18 @@
+<h2>Speisekarte</h2>
+
+@if (menu$ | async; as menu) {
+  @for (category of menu.categories; track category.id) {
+    <h3>{{ category.name }}</h3>
+
+    <ul>
+      @for (item of category.items; track item.id) {
+        <li>
+          <strong>{{ item.name }}</strong>
+          - {{ item.price }} €
+          <br>
+          {{ item.description }}
+        </li>
+      }
+    </ul>
+  }
+}
