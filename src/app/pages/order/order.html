@@ -1,4 +1,36 @@
 <h2>Bestellung</h2>
-<p>
-  Hier wird später die aktuelle Bestellung vorbereitet und abgeschickt.
-</p>
+
+@if (items.length === 0) {
+  <p>Es wurden noch keine Speisen ausgewählt.</p>
+}
+
+@if (items.length > 0) {
+  <ul>
+    @for (item of items; track item.menuItem.id) {
+      <li>
+        {{ item.quantity }} x {{ item.menuItem.name }} 
+        - {{ item.menuItem.price * item.quantity | number:'1.2-2' }} € 
+      </li>
+    }
+  </ul>
+
+  <p>
+    <strong>Zwischensumme:</strong>
+    {{ getTotal() | number:'1.2-2' }} €
+  </p>
+
+  <button type="button" (click)="loadPricePreview()">
+    Preis inkl. Lieferung berechnen
+  </button>
+
+  @if (pricePreview(); as preview) {
+    <h3>Preisvorschau</h3>
+    <p>Warenwert: {{ preview.itemsTotal | number:'1.2-2' }} €</p>
+    <p>Lieferkosten: {{ preview.deliveryFee | number:'1.2-2' }} €</p>
+    <p><strong>Gesamtpreis: {{ preview.totalPrice | number:'1.2-2' }}</strong></p>
+  }
+
+  <button type="button" (click)="clearCart()">
+    Bestellung leeren
+  </button>
+}

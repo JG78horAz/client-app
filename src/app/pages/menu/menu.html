@@ -8,9 +8,13 @@
       @for (item of category.items; track item.id) {
         <li>
           <strong>{{ item.name }}</strong>
-          - {{ item.price }} €
+          - {{ item.price | number:'1.2-2' }} €
           <br>
           {{ item.description }}
+          <br>
+          <button type="button" (click)="addToCart(item)">
+            Zur Bestellung hinzufügen
+          </button>
         </li>
       }
     </ul>
