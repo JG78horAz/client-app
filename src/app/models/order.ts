@@ -19,7 +19,7 @@ export interface PricePreviewResponse {
 
 export interface CreateOrderRequest {
   studentId: number;
-  reestaurantId: number;
+  restaurantId: number;
   deliveryAddressText: string;
   deliveryLatitude: number;
   deliveryLongitude: number;
@@ -28,4 +28,6 @@ export interface CreateOrderRequest {
 
 export interface CreateOrderResponse {
   orderId: number;
+  orderStatus: number;
+  totalPrice: number;
 }

@@ -1,2 +1,144 @@
-<h2>Restaurant-Verwaltung</h2>
-<p>Hier können Restaurants später ihre Daten und Speisekarte verwalten.</p>
+<h2>Restaurant registrieren</h2>
+
+<h3>Restaurantdaten</h3>
+
+<label>
+  Name:
+  <input type="text" name="name" [(ngModel)]="name" required>
+</label>
+<br>
+
+<label>
+  Straße:
+  <input type="text" name="street" [(ngModel)]="street" required>
+</label>
+<br>
+
+<label>
+  PLZ:
+  <input type="text" name="postalCode" [(ngModel)]="postalCode" required>
+</label>
+<br>
+
+<label>
+  Ort:
+  <input type="text" name="city" [(ngModel)]="city" required>
+</label>
+<br>
+
+<label>
+  Latitude:
+  <input type="number" name="latitude" [(ngModel)]="latitude" required>
+</label>
+<br>
+
+<label>
+  Longitude:
+  <input type="number" name="longitude" [(ngModel)]="longitude" required>
+</label>
+<br>
+
+<label>
+  Webhook-URL:
+  <input type="url" name="webhookUrl" [(ngModel)]="webhookUrl" required>
+</label>
+<br>
+
+<label>
+  Bild-URL:
+  <input type="url" name="imageUrl" [(ngModel)]="imageUrl">
+</label>
+
+<hr>
+
+<h2>Öffnungszeiten</h2>
+
+<h3>Aktuelle Öffnungszeiten</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Wochentag</th>
+      <th>Öffnungszeiten</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (day of weekdays; track day.value) {
+      <tr>
+        <td>{{ day.label }}</td>
+        <td>
+          @for (openingTime of openingTimes(); track $index) {
+            @if (openingTime.dayOfWeek === day.value) {
+              <div>
+                {{ openingTime.opensAt }} - {{ openingTime.closesAt }}
+
+                <button type="button" (click)="removeOpeningTime($index)">
+                  Entfernen
+                </button>
+              </div>
+            }
+          }
+
+          @if (!hasOpeningTimeForDay(day.value)) {
+            <em>Geschlossen</em>
+          }
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+<h3>Öffnungszeit hinzufügen</h3>
+
+<p>Wochentage:</p>
+
+@for (day of weekdays; track day.value) {
+  <label>
+    <input
+      type="checkbox"
+      name="weekday-{{ day.value }}"
+      [(ngModel)]="day.selected"
+    >
+    {{ day.label }}
+  </label>
+  <br>
+}
+
+<label>
+  Öffnet um:
+  <input type="time" name="newOpensAt" [(ngModel)]="newOpensAt">
+</label>
+<br>
+
+<label>
+  Schließt um:
+  <input type="time" name="newClosesAt" [(ngModel)]="newClosesAt">
+</label>
+<br>
+
+<button type="button" (click)="addOpeningTime()">
+  Öffnungszeit hinzufügen
+</button>
+
+<br>
+<br>
+
+@if (!response()) {
+  <button type="button" (click)="registerRestaurant()">
+    Restaurant mit Öffnungszeiten registrieren
+  </button>
+}
+
+@if (response(); as registeredRestaurant) {
+  <h3>Restaurant wurde registriert</h3>
+  <p>Restaurant-ID: {{ registeredRestaurant.restaurantId }}</p>
+  <p>Änderungen an den Öffnungszeiten werden nun automatisch gespeichert.</p>
+}
+
+@if (errorMessage()) {
+  <p>{{ errorMessage() }}</p>
+}
+
+@if (openingTimesMessage()) {
+  <p>{{ openingTimesMessage() }}</p>
+}
