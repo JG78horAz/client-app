@@ -11,8 +11,27 @@
     <nav class="main-nav">
       <a routerLink="/restaurants">Restaurants</a>
       <a routerLink="/order">Bestellung</a>
-      <a routerLink="/admin">Restaurant-Verwaltung</a>
+
+      @if (authService.authenticated()) {
+        <a routerLink="/admin">Restaurant-Verwaltung</a>
+      }
     </nav>
+
+    <div class="auth-actions">
+      @if (authService.authenticated()) {
+        <span class="login-name">
+          {{ authService.userName() }}
+        </span>
+
+        <button type="button" class="auth-button" (click)="authService.logout()">
+          Logout
+        </button>
+      } @else {
+        <button type="button" class="auth-button" (click)="authService.login()">
+          Login
+        </button>
+      }
+    </div>
   </div>
 </header>
 

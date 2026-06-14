@@ -8,6 +8,7 @@ import {
   UpdateOpeningTimeRequest,
 } from '../../models/opening-time';
 import { RestaurantContextService } from '../../services/restaurant-context';
+import { AuthService } from '../../services/auth';
 
 interface WeekdaySelection {
   value: number;
@@ -35,6 +36,8 @@ interface MenuItemDraft {
 export class Admin {
   private readonly restaurantService = inject(RestaurantService);
   private readonly restaurantContextService = inject(RestaurantContextService);
+
+  readonly authService = inject(AuthService);
 
   name = '';
   street = '';

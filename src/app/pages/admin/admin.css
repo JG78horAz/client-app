@@ -4,6 +4,13 @@
   gap: 1.25rem;
 }
 
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
 .admin-header h2 {
   margin-bottom: 0.35rem;
 }
@@ -11,6 +18,29 @@
 .admin-header p {
   margin: 0;
   color: var(--color-muted);
+}
+
+.oauth-status {
+  flex-shrink: 0;
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius);
+  padding: 0.75rem 0.9rem;
+  box-shadow: var(--shadow);
+  min-width: 210px;
+}
+
+.oauth-status span {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 800;
+  margin-bottom: 0.2rem;
+}
+
+.oauth-status strong {
+  display: block;
+  font-size: 1rem;
 }
 
 .admin-card,
@@ -247,6 +277,14 @@
 }
 
 @media (max-width: 950px) {
+  .admin-header {
+    flex-direction: column;
+  }
+
+  .oauth-status {
+    width: 100%;
+  }
+
   .form-grid {
     grid-template-columns: repeat(2, 1fr);
   }

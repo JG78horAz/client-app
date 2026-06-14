@@ -10,7 +10,6 @@
   margin: 0 auto;
   padding: 1rem 1.25rem;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 1.5rem;
 }
@@ -21,6 +20,7 @@
   gap: 0.75rem;
   color: white;
   text-decoration: none;
+  flex-shrink: 0;
 }
 
 .brand:hover {
@@ -73,7 +73,7 @@
 .main-nav {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 0.35rem;
 }
 
@@ -91,6 +91,34 @@
   text-decoration: none;
 }
 
+.auth-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.login-name {
+  color: #d8e4db;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.auth-button {
+  margin: 0;
+  padding: 0.55rem 0.8rem;
+  background: var(--color-accent);
+  color: white;
+  border-radius: 9px;
+  font-weight: 800;
+}
+
+.auth-button:hover {
+  background: var(--color-accent-dark);
+}
+
 .app-main {
   max-width: 1120px;
   margin: 0 auto;
@@ -98,13 +126,14 @@
   min-height: calc(100vh - 90px);
 }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .app-header-inner {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .main-nav {
+  .auth-actions {
+    margin-left: 0;
     justify-content: flex-start;
   }
 

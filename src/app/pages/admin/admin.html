@@ -6,6 +6,11 @@
         Restaurant registrieren, Öffnungszeiten erfassen und Speisekarte vorbereiten.
       </p>
     </div>
+
+    <div class="oauth-status">
+      <span>OAuth-Login aktiv</span>
+      <strong>{{ authService.userName() }}</strong>
+    </div>
   </div>
 
   <section class="admin-card">
@@ -266,7 +271,7 @@
         <br>
         Restaurant-ID: {{ registeredRestaurant.restaurantId }}
         <br>
-        Änderungen an Öffnungszeiten und Speisekarte werden automatisch gespeichert.
+        Änderungen an Öffnungszeiten und Speisekarte werden über den API-Key des registrierten Restaurants gespeichert.
       </div>
     }
 
