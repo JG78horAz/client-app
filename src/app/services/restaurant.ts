@@ -10,6 +10,7 @@ import {
   OpeningTimeResponse,
   UpdateOpeningTimesRequest,
 } from '../models/opening-time';
+import { UpdateMenuRequest } from '../models/update-menu';
 
 @Injectable({
   providedIn: 'root',
@@ -43,6 +44,14 @@ export class RestaurantService {
     return this.http.get<MenuResponse>(
       `${this.apiUrl}/restaurants/${restaurantId}/menu`
     );
+  }
+
+  updateMenu(restaurantId: number, apiKey: string, request: UpdateMenuRequest) {
+    return this.http.put(`${this.apiUrl}/restaurants/${restaurantId}/menu`, request, {
+      headers: {
+        'X-Api-Key': apiKey,
+      },
+    });
   }
 
   registerRestaurant(request: RegisterRestaurantRequest) {

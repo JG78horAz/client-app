@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RestaurantService } from '../../services/restaurant';
 import { RegisterRestaurantResponse } from '../../models/register-restaurant';
@@ -14,9 +15,20 @@ interface WeekdaySelection {
   selected: boolean;
 }
 
+interface MenuCategoryDraft {
+  name: string;
+  items: MenuItemDraft[];
+}
+
+interface MenuItemDraft {
+  name: string;
+  description: string;
+  price: number;
+}
+
 @Component({
   selector: 'app-admin',
-  imports: [FormsModule],
+  imports: [FormsModule, DecimalPipe],
   templateUrl: './admin.html',
   styleUrl: './admin.css',
 })
@@ -36,6 +48,7 @@ export class Admin {
   response = signal<RegisterRestaurantResponse | undefined>(undefined);
   errorMessage = signal('');
   openingTimesMessage = signal('');
+  menuMessage = signal('');
 
   openingTimes = signal<OpeningTimeResponse[]>([]);
 
@@ -52,10 +65,19 @@ export class Admin {
   newOpensAt = '';
   newClosesAt = '';
 
+  menuCategories = signal<MenuCategoryDraft[]>([]);
+  newCategoryName = '';
+
+  selectedCategoryIndex = 0;
+  newItemName = '';
+  newItemDescription = '';
+  newItemPrice = 0;
+
   registerRestaurant() {
     this.errorMessage.set('');
     this.response.set(undefined);
     this.openingTimesMessage.set('');
+    this.menuMessage.set('');
 
     const request = {
       name: this.name,
@@ -83,6 +105,7 @@ export class Admin {
         );
 
         this.loadOpeningTimes();
+        this.saveMenu();
       },
       error: () => {
         this.errorMessage.set('Restaurant konnte nicht registriert werden.');
@@ -165,6 +188,111 @@ export class Admin {
     }
   }
 
+  addCategory() {
+    if (!this.newCategoryName.trim()) {
+      this.menuMessage.set('Bitte Kategorienamen eingeben.');
+      return;
+    }
+
+    this.menuCategories.update(categories => [
+      ...categories,
+      {
+        name: this.newCategoryName.trim(),
+        items: [],
+      },
+    ]);
+
+    this.newCategoryName = '';
+    this.menuMessage.set('');
+
+    if (this.restaurantContextService.hasContext()) {
+      this.saveMenu();
+    }
+  }
+
+  removeCategory(index: number) {
+    this.menuCategories.update(categories =>
+      categories.filter((_, currentIndex) => currentIndex !== index)
+    );
+
+    if (this.selectedCategoryIndex >= this.menuCategories().length) {
+      this.selectedCategoryIndex = 0;
+    }
+
+    if (this.restaurantContextService.hasContext()) {
+      this.saveMenu();
+    }
+  }
+
+  addMenuItem() {
+    const categories = this.menuCategories();
+
+    if (categories.length === 0) {
+      this.menuMessage.set('Bitte zuerst eine Kategorie anlegen.');
+      return;
+    }
+
+    if (!this.newItemName.trim()) {
+      this.menuMessage.set('Bitte Speisename eingeben.');
+      return;
+    }
+
+    if (this.newItemPrice <= 0) {
+      this.menuMessage.set('Der Preis muss größer als 0 sein.');
+      return;
+    }
+
+    this.menuCategories.update(currentCategories =>
+      currentCategories.map((category, index) => {
+        if (index !== this.selectedCategoryIndex) {
+          return category;
+        }
+
+        return {
+          ...category,
+          items: [
+            ...category.items,
+            {
+              name: this.newItemName.trim(),
+              description: this.newItemDescription.trim(),
+              price: this.newItemPrice,
+            },
+          ],
+        };
+      })
+    );
+
+    this.newItemName = '';
+    this.newItemDescription = '';
+    this.newItemPrice = 0;
+    this.menuMessage.set('');
+
+    if (this.restaurantContextService.hasContext()) {
+      this.saveMenu();
+    }
+  }
+
+  removeMenuItem(categoryIndex: number, itemIndex: number) {
+    this.menuCategories.update(categories =>
+      categories.map((category, index) => {
+        if (index !== categoryIndex) {
+          return category;
+        }
+
+        return {
+          ...category,
+          items: category.items.filter(
+            (_, currentIndex) => currentIndex !== itemIndex
+          ),
+        };
+      })
+    );
+
+    if (this.restaurantContextService.hasContext()) {
+      this.saveMenu();
+    }
+  }
+
   private saveOpeningTimes() {
     const restaurantId = this.restaurantContextService.getRestaurantId();
     const apiKey = this.restaurantContextService.getApiKey();
@@ -197,31 +325,42 @@ export class Admin {
       });
   }
 
+  private saveMenu() {
+    const restaurantId = this.restaurantContextService.getRestaurantId();
+    const apiKey = this.restaurantContextService.getApiKey();
+
+    if (restaurantId === undefined || apiKey === undefined) {
+      this.menuMessage.set('Bitte zuerst ein Restaurant registrieren.');
+      return;
+    }
+
+    const request = {
+      categories: this.menuCategories().map((category, categoryIndex) => ({
+        name: category.name,
+        sortOrder: categoryIndex + 1,
+        items: category.items.map((item, itemIndex) => ({
+          name: item.name,
+          description: item.description || undefined,
+          price: item.price,
+          sortOrder: itemIndex + 1,
+        })),
+      })),
+    };
+
+    this.restaurantService.updateMenu(restaurantId, apiKey, request).subscribe({
+      next: () => {
+        this.menuMessage.set('Speisekarte wurde gespeichert.');
+      },
+      error: () => {
+        this.menuMessage.set('Speisekarte konnte nicht gespeichert werden.');
+      },
+    });
+  }
+
   hasOpeningTimeForDay(dayOfWeek: number) {
     return this.openingTimes().some(
       openingTime => openingTime.dayOfWeek === dayOfWeek
     );
-  }
-
-  getDayName(dayOfWeek: number) {
-    switch (dayOfWeek) {
-      case 0:
-        return 'Sonntag';
-      case 1:
-        return 'Montag';
-      case 2:
-        return 'Dienstag';
-      case 3:
-        return 'Mittwoch';
-      case 4:
-        return 'Donnerstag';
-      case 5:
-        return 'Freitag';
-      case 6:
-        return 'Samstag';
-      default:
-        return 'Unbekannt';
-    }
   }
 
   private formatTime(value: string) {

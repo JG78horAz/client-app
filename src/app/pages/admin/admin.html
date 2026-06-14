@@ -53,8 +53,6 @@
 
 <h2>Öffnungszeiten</h2>
 
-<h3>Aktuelle Öffnungszeiten</h3>
-
 <table>
   <thead>
     <tr>
@@ -67,12 +65,12 @@
       <tr>
         <td>{{ day.label }}</td>
         <td>
-          @for (openingTime of openingTimes(); track $index) {
+          @for (openingTime of openingTimes(); track $index; let openingTimeIndex = $index) {
             @if (openingTime.dayOfWeek === day.value) {
               <div>
                 {{ openingTime.opensAt }} - {{ openingTime.closesAt }}
 
-                <button type="button" (click)="removeOpeningTime($index)">
+                <button type="button" (click)="removeOpeningTime(openingTimeIndex)">
                   Entfernen
                 </button>
               </div>
@@ -120,25 +118,111 @@
   Öffnungszeit hinzufügen
 </button>
 
+@if (openingTimesMessage()) {
+  <p>{{ openingTimesMessage() }}</p>
+}
+
+<hr>
+
+<h2>Speisekarte</h2>
+
+@if (menuCategories().length === 0) {
+  <p>Noch keine Kategorien angelegt.</p>
+}
+
+@for (category of menuCategories(); track $index; let categoryIndex = $index) {
+  <h3>{{ category.name }}</h3>
+
+  <button type="button" (click)="removeCategory(categoryIndex)">
+    Kategorie entfernen
+  </button>
+
+  @if (category.items.length === 0) {
+    <p>Keine Speisen in dieser Kategorie.</p>
+  }
+
+  @if (category.items.length > 0) {
+    <ul>
+      @for (item of category.items; track $index; let itemIndex = $index) {
+        <li>
+          <strong>{{ item.name }}</strong>
+          - {{ item.price | number:'1.2-2' }} €
+          <br>
+          {{ item.description }}
+
+          <button type="button" (click)="removeMenuItem(categoryIndex, itemIndex)">
+            Entfernen
+          </button>
+        </li>
+      }
+    </ul>
+  }
+}
+
+<h3>Kategorie hinzufügen</h3>
+
+<label>
+  Kategoriename:
+  <input type="text" name="newCategoryName" [(ngModel)]="newCategoryName">
+</label>
+
+<button type="button" (click)="addCategory()">
+  Kategorie hinzufügen
+</button>
+
+<h3>Speise hinzufügen</h3>
+
+<label>
+  Kategorie:
+  <select name="selectedCategoryIndex" [(ngModel)]="selectedCategoryIndex">
+    @for (category of menuCategories(); track $index; let categoryIndex = $index) {
+      <option [ngValue]="categoryIndex">{{ category.name }}</option>
+    }
+  </select>
+</label>
+<br>
+
+<label>
+  Name:
+  <input type="text" name="newItemName" [(ngModel)]="newItemName">
+</label>
+<br>
+
+<label>
+  Beschreibung:
+  <input type="text" name="newItemDescription" [(ngModel)]="newItemDescription">
+</label>
+<br>
+
+<label>
+  Preis:
+  <input type="number" name="newItemPrice" [(ngModel)]="newItemPrice">
+</label>
+<br>
+
+<button type="button" (click)="addMenuItem()">
+  Speise hinzufügen
+</button>
+
+@if (menuMessage()) {
+  <p>{{ menuMessage() }}</p>
+}
+
 <br>
 <br>
 
 @if (!response()) {
   <button type="button" (click)="registerRestaurant()">
-    Restaurant mit Öffnungszeiten registrieren
+    Restaurant mit Öffnungszeiten und Speisekarte registrieren
   </button>
 }
 
 @if (response(); as registeredRestaurant) {
   <h3>Restaurant wurde registriert</h3>
   <p>Restaurant-ID: {{ registeredRestaurant.restaurantId }}</p>
-  <p>Änderungen an den Öffnungszeiten werden nun automatisch gespeichert.</p>
+  <p>Änderungen an Öffnungszeiten und Speisekarte werden automatisch gespeichert.</p>
 }
 
 @if (errorMessage()) {
   <p>{{ errorMessage() }}</p>
-}
-
-@if (openingTimesMessage()) {
-  <p>{{ openingTimesMessage() }}</p>
 }
