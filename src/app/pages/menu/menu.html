@@ -1,22 +1,63 @@
-<h2>Speisekarte</h2>
+<section class="menu-page">
+  <div class="menu-header">
+    <div>
+      <h2>Speisekarte</h2>
+      <p>
+        Wähle Speisen aus und füge sie deiner Bestellung hinzu.
+      </p>
+    </div>
 
-@if (menu$ | async; as menu) {
-  @for (category of menu.categories; track category.id) {
-    <h3>{{ category.name }}</h3>
+    <a routerLink="/order" class="order-link">
+      Zur Bestellung
+    </a>
+  </div>
 
-    <ul>
-      @for (item of category.items; track item.id) {
-        <li>
-          <strong>{{ item.name }}</strong>
-          - {{ item.price | number:'1.2-2' }} €
-          <br>
-          {{ item.description }}
-          <br>
-          <button type="button" (click)="addToCart(item)">
-            Zur Bestellung hinzufügen
-          </button>
-        </li>
-      }
-    </ul>
+  @if (addedItemMessage()) {
+    <div class="add-feedback">
+      {{ addedItemMessage() }}
+    </div>
   }
-}
+
+  @if (menu$ | async; as menu) {
+    @if (menu.categories.length === 0) {
+      <p class="empty-state">Für dieses Restaurant wurde noch keine Speisekarte hinterlegt.</p>
+    }
+
+    @if (menu.categories.length > 0) {
+      <div class="category-list">
+        @for (category of menu.categories; track category.id) {
+          <section class="menu-category">
+            <div class="category-header">
+              <h3>{{ category.name }}</h3>
+              <span>{{ category.items.length }} Speisen</span>
+            </div>
+
+            <div class="item-grid">
+              @for (item of category.items; track item.id) {
+                <article class="menu-item">
+                  <div class="item-content">
+                    <div>
+                      <h4>{{ item.name }}</h4>
+
+                      @if (item.description) {
+                        <p>{{ item.description }}</p>
+                      }
+                    </div>
+
+                    <strong class="price">
+                      {{ item.price | number:'1.2-2' }} €
+                    </strong>
+                  </div>
+
+                  <button type="button" (click)="addToCart(item)">
+                    Zur Bestellung hinzufügen
+                  </button>
+                </article>
+              }
+            </div>
+          </section>
+        }
+      </div>
+    }
+  }
+</section>

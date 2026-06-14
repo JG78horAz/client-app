@@ -1,58 +1,126 @@
-<h2>Bestellung</h2>
+<section class="order-page">
+  <div class="order-header">
+    <div>
+      <h2>Bestellung</h2>
+      <p>
+        Prüfe deinen Warenkorb, wähle einen Lieferort und berechne den Gesamtpreis
+        inklusive Lieferkosten.
+      </p>
+    </div>
+  </div>
 
-<label>
-  Student-ID:
-  <input type="number" [(ngModel)]="studentId">
-</label>
-<br>
+  @if (items.length === 0) {
+    <section class="empty-order">
+      <h3>Dein Warenkorb ist leer</h3>
 
-<label>
-  Lieferadresse:
-  <input type="text" [(ngModel)]="deliveryAddressText">
-</label>
-<br>
+      <p>
+        Es wurden noch keine Speisen ausgewählt. Suche ein Restaurant aus und
+        lege Speisen in den Warenkorb.
+      </p>
 
-@if (items.length === 0) {
-  <p>Es wurden noch keine Speisen ausgewählt.</p>
-}
-
-@if (items.length > 0) {
-  <ul>
-    @for (item of items; track item.menuItem.id) {
-      <li>
-        {{ item.quantity }} x {{ item.menuItem.name }} 
-        - {{ item.menuItem.price * item.quantity | number:'1.2-2' }} € 
-      </li>
-    }
-  </ul>
-
-  <p>
-    <strong>Zwischensumme:</strong>
-    {{ getTotal() | number:'1.2-2' }} €
-  </p>
-
-  <button type="button" (click)="loadPricePreview()">
-    Preis inkl. Lieferung berechnen
-  </button>
-
-  @if (pricePreview(); as preview) {
-    <h3>Preisvorschau</h3>
-    <p>Warenwert: {{ preview.itemsTotal | number:'1.2-2' }} €</p>
-    <p>Lieferkosten: {{ preview.deliveryFee | number:'1.2-2' }} €</p>
-    <p><strong>Gesamtpreis: {{ preview.totalPrice | number:'1.2-2' }}</strong></p>
+      <a routerLink="/restaurants">
+        Restaurants suchen
+      </a>
+    </section>
   }
 
-  <button type="button" (click)="createOrder()">
-    Bestellung abschicken
-  </button>
+  @if (items.length > 0) {
+    <div class="order-layout">
+      <section class="order-card">
+        <h3>Warenkorb</h3>
 
-  @if (orderResponse) {
-    <h3>Bestellung erstellt</h3>
-    <p>Bestellnummer: {{ orderResponse.orderId }}</p>
-    <p>Gesamtpreis: {{ orderResponse.totalPrice | number:'1.2-2' }} €</p>
+        <div class="cart-items">
+          @for (item of items; track item.menuItem.id) {
+            <div class="cart-item">
+              <div>
+                <strong>{{ item.menuItem.name }}</strong>
+
+                @if (item.menuItem.description) {
+                  <p>{{ item.menuItem.description }}</p>
+                }
+              </div>
+
+              <div class="cart-price">
+                <span>{{ item.quantity }} × {{ item.menuItem.price | number:'1.2-2' }} €</span>
+                <strong>
+                  {{ item.quantity * item.menuItem.price | number:'1.2-2' }} €
+                </strong>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="subtotal-row">
+          <span>Zwischensumme</span>
+          <strong>{{ getTotal() | number:'1.2-2' }} €</strong>
+        </div>
+
+        <button type="button" class="secondary-button" (click)="clearCart()">
+          Warenkorb leeren
+        </button>
+      </section>
+
+      <section class="order-card">
+        <h3>Lieferort</h3>
+
+        <label>
+          Lieferadresse:
+          <select
+            name="selectedDeliveryLocationIndex"
+            [(ngModel)]="selectedDeliveryLocationIndex"
+            (ngModelChange)="selectDeliveryLocation()"
+          >
+            @for (location of deliveryLocations; track $index) {
+              <option [ngValue]="$index">
+                {{ location.label }}
+              </option>
+            }
+          </select>
+        </label>
+
+        <p class="delivery-address">
+          {{ deliveryAddressText }}
+        </p>
+
+        <div class="button-row">
+          <button type="button" (click)="loadPricePreview()">
+            Preis berechnen
+          </button>
+        </div>
+
+        @if (pricePreview(); as preview) {
+          <div class="price-preview">
+            <div>
+              <span>Speisen</span>
+              <strong>{{ preview.itemsTotal | number:'1.2-2' }} €</strong>
+            </div>
+
+            <div>
+              <span>Lieferkosten</span>
+              <strong>{{ preview.deliveryFee | number:'1.2-2' }} €</strong>
+            </div>
+
+            <div class="total">
+              <span>Gesamtpreis</span>
+              <strong>{{ preview.totalPrice | number:'1.2-2' }} €</strong>
+            </div>
+          </div>
+
+          <button type="button" (click)="createOrder()">
+            Bestellung abschicken
+          </button>
+        }
+
+        @if (orderResponse(); as response) {
+          <div class="message success">
+            <strong>Bestellung wurde erstellt.</strong>
+            <br>
+            Bestellnummer: {{ response.orderId }}
+            <br>
+            Gesamtpreis: {{ response.totalPrice | number:'1.2-2' }} €
+          </div>
+        }
+      </section>
+    </div>
   }
-
-  <button type="button" (click)="clearCart()">
-    Bestellung leeren
-  </button>
-}
+</section>

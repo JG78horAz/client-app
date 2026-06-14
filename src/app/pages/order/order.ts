@@ -1,27 +1,71 @@
+import { DecimalPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { CartService } from '../../services/cart';
 import { OrderService } from '../../services/order';
 import { CreateOrderResponse, PricePreviewResponse } from '../../models/order';
-import { DecimalPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+
+interface DeliveryLocation {
+  label: string;
+  addressText: string;
+  latitude: number;
+  longitude: number;
+}
 
 @Component({
   selector: 'app-order',
-  imports: [DecimalPipe, FormsModule],
+  imports: [DecimalPipe, FormsModule, RouterLink],
   templateUrl: './order.html',
-  styleUrl: './order.css'
+  styleUrl: './order.css',
 })
 export class Order {
   private readonly cartService = inject(CartService);
   private readonly orderService = inject(OrderService);
 
   items = this.cartService.getItems();
-  pricePreview = signal<PricePreviewResponse | undefined>(undefined);
 
-  studentId = 1;
-  deliveryAddressText = 'FH Hagenberg';
-  deliveryLatitude = 48.3676;
-  deliveryLongitude = 14.5168;
+  pricePreview = signal<PricePreviewResponse | undefined>(undefined);
+  orderResponse = signal<CreateOrderResponse | undefined>(undefined);
+
+  private readonly studentId = 1;
+
+  deliveryLocations: DeliveryLocation[] = [
+    {
+      label: 'FH Hagenberg / Softwarepark',
+      addressText: 'FH Hagenberg, Softwarepark 11, 4232 Hagenberg im Mühlkreis',
+      latitude: 48.3676,
+      longitude: 14.5168,
+    },
+    {
+      label: 'Schloss Hagenberg',
+      addressText: 'Schloss Hagenberg, Kirchenplatz 5, 4232 Hagenberg im Mühlkreis',
+      latitude: 48.366998,
+      longitude: 14.51578,
+    },
+    {
+      label: 'Softwarepark 30',
+      addressText: 'Softwarepark 30, 4232 Hagenberg im Mühlkreis',
+      latitude: 48.3702611,
+      longitude: 14.5146346,
+    },
+  ];
+
+  selectedDeliveryLocationIndex = 0;
+
+  deliveryAddressText = this.deliveryLocations[0].addressText;
+  deliveryLatitude = this.deliveryLocations[0].latitude;
+  deliveryLongitude = this.deliveryLocations[0].longitude;
+
+  selectDeliveryLocation() {
+    const selectedLocation = this.deliveryLocations[this.selectedDeliveryLocationIndex];
+
+    this.deliveryAddressText = selectedLocation.addressText;
+    this.deliveryLatitude = selectedLocation.latitude;
+    this.deliveryLongitude = selectedLocation.longitude;
+    this.pricePreview.set(undefined);
+    this.orderResponse.set(undefined);
+  }
 
   getTotal() {
     return this.items.reduce(
@@ -31,6 +75,12 @@ export class Order {
   }
 
   loadPricePreview() {
+    const restaurantId = this.cartService.getRestaurantId();
+
+    if (restaurantId === undefined || this.items.length === 0) {
+      return;
+    }
+
     const request = {
       deliveryAddressText: this.deliveryAddressText,
       studentLatitude: this.deliveryLatitude,
@@ -41,28 +91,16 @@ export class Order {
       })),
     };
 
-    const restaurantId = this.cartService.getRestaurantId();
-
-    if (restaurantId === undefined) {
-      return;
-    }
-
     this.orderService.getPricePreview(restaurantId, request).subscribe(response => {
       this.pricePreview.set(response);
+      this.orderResponse.set(undefined);
     });
   }
-
-  clearCart() {
-    this.cartService.clear();
-    this.pricePreview.set(undefined);
-  }
-
-  orderResponse?: CreateOrderResponse;
 
   createOrder() {
     const restaurantId = this.cartService.getRestaurantId();
 
-    if (restaurantId === undefined) {
+    if (restaurantId === undefined || this.items.length === 0) {
       return;
     }
 
@@ -79,9 +117,15 @@ export class Order {
     };
 
     this.orderService.createOrder(request).subscribe(response => {
-      this.orderResponse = response;
+      this.orderResponse.set(response);
       this.cartService.clear();
       this.pricePreview.set(undefined);
     });
+  }
+
+  clearCart() {
+    this.cartService.clear();
+    this.pricePreview.set(undefined);
+    this.orderResponse.set(undefined);
   }
 }

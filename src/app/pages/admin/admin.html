@@ -1,228 +1,277 @@
-<h2>Restaurant registrieren</h2>
+<section class="admin-page">
+  <div class="admin-header">
+    <div>
+      <h2>Restaurant-Verwaltung</h2>
+      <p>
+        Restaurant registrieren, Öffnungszeiten erfassen und Speisekarte vorbereiten.
+      </p>
+    </div>
+  </div>
 
-<h3>Restaurantdaten</h3>
+  <section class="admin-card">
+    <h3>Restaurantdaten</h3>
 
-<label>
-  Name:
-  <input type="text" name="name" [(ngModel)]="name" required>
-</label>
-<br>
+    <div class="form-grid">
+      <label>
+        Name:
+        <input type="text" name="name" [(ngModel)]="name" required>
+      </label>
 
-<label>
-  Straße:
-  <input type="text" name="street" [(ngModel)]="street" required>
-</label>
-<br>
+      <label>
+        Straße:
+        <input type="text" name="street" [(ngModel)]="street" required>
+      </label>
 
-<label>
-  PLZ:
-  <input type="text" name="postalCode" [(ngModel)]="postalCode" required>
-</label>
-<br>
+      <label>
+        PLZ:
+        <input type="text" name="postalCode" [(ngModel)]="postalCode" required>
+      </label>
 
-<label>
-  Ort:
-  <input type="text" name="city" [(ngModel)]="city" required>
-</label>
-<br>
+      <label>
+        Ort:
+        <input type="text" name="city" [(ngModel)]="city" required>
+      </label>
 
-<label>
-  Latitude:
-  <input type="number" name="latitude" [(ngModel)]="latitude" required>
-</label>
-<br>
+      <label>
+        Latitude:
+        <input type="number" name="latitude" [(ngModel)]="latitude" required>
+      </label>
 
-<label>
-  Longitude:
-  <input type="number" name="longitude" [(ngModel)]="longitude" required>
-</label>
-<br>
+      <label>
+        Longitude:
+        <input type="number" name="longitude" [(ngModel)]="longitude" required>
+      </label>
 
-<label>
-  Webhook-URL:
-  <input type="url" name="webhookUrl" [(ngModel)]="webhookUrl" required>
-</label>
-<br>
+      <label class="wide-field">
+        Webhook-URL:
+        <input type="url" name="webhookUrl" [(ngModel)]="webhookUrl" required>
+      </label>
 
-<label>
-  Bild-URL:
-  <input type="url" name="imageUrl" [(ngModel)]="imageUrl">
-</label>
+      <label class="wide-field">
+        Bild-URL:
+        <input type="url" name="imageUrl" [(ngModel)]="imageUrl">
+      </label>
+    </div>
+  </section>
 
-<hr>
+  <section class="admin-card">
+    <div class="section-title-row">
+      <div>
+        <h3>Öffnungszeiten</h3>
+        <p>Lege fest, an welchen Tagen das Restaurant geöffnet ist.</p>
+      </div>
+    </div>
 
-<h2>Öffnungszeiten</h2>
+    <table class="opening-table">
+      <thead>
+        <tr>
+          <th>Wochentag</th>
+          <th>Öffnungszeiten</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (day of weekdays; track day.value) {
+          <tr>
+            <td>{{ day.label }}</td>
+            <td>
+              @for (openingTime of openingTimes(); track $index; let openingTimeIndex = $index) {
+                @if (openingTime.dayOfWeek === day.value) {
+                  <div class="opening-time-row">
+                    <span>{{ openingTime.opensAt }} - {{ openingTime.closesAt }}</span>
 
-<table>
-  <thead>
-    <tr>
-      <th>Wochentag</th>
-      <th>Öffnungszeiten</th>
-    </tr>
-  </thead>
-  <tbody>
-    @for (day of weekdays; track day.value) {
-      <tr>
-        <td>{{ day.label }}</td>
-        <td>
-          @for (openingTime of openingTimes(); track $index; let openingTimeIndex = $index) {
-            @if (openingTime.dayOfWeek === day.value) {
-              <div>
-                {{ openingTime.opensAt }} - {{ openingTime.closesAt }}
+                    <button
+                      type="button"
+                      class="small-button"
+                      (click)="removeOpeningTime(openingTimeIndex)"
+                    >
+                      Entfernen
+                    </button>
+                  </div>
+                }
+              }
 
-                <button type="button" (click)="removeOpeningTime(openingTimeIndex)">
-                  Entfernen
-                </button>
+              @if (!hasOpeningTimeForDay(day.value)) {
+                <em>Geschlossen</em>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="compact-form">
+      <h4>Öffnungszeit hinzufügen</h4>
+
+      <div class="weekday-grid">
+        @for (day of weekdays; track day.value) {
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              name="weekday-{{ day.value }}"
+              [(ngModel)]="day.selected"
+            >
+            {{ day.label }}
+          </label>
+        }
+      </div>
+
+      <div class="time-grid">
+        <label>
+          Öffnet um:
+          <input type="time" name="newOpensAt" [(ngModel)]="newOpensAt">
+        </label>
+
+        <label>
+          Schließt um:
+          <input type="time" name="newClosesAt" [(ngModel)]="newClosesAt">
+        </label>
+
+        <div class="button-cell">
+          <button type="button" (click)="addOpeningTime()">
+            Öffnungszeit hinzufügen
+          </button>
+        </div>
+      </div>
+    </div>
+
+    @if (openingTimesMessage()) {
+      <p class="message">{{ openingTimesMessage() }}</p>
+    }
+  </section>
+
+  <section class="admin-card">
+    <div class="section-title-row">
+      <div>
+        <h3>Speisekarte</h3>
+        <p>Kategorien und Speisen vor der Registrierung erfassen.</p>
+      </div>
+    </div>
+
+    @if (menuCategories().length === 0) {
+      <p class="empty-state">Noch keine Kategorien angelegt.</p>
+    }
+
+    @if (menuCategories().length > 0) {
+      <div class="menu-category-list">
+        @for (category of menuCategories(); track $index; let categoryIndex = $index) {
+          <article class="menu-category-card">
+            <div class="category-header">
+              <h4>{{ category.name }}</h4>
+
+              <button type="button" class="small-button" (click)="removeCategory(categoryIndex)">
+                Kategorie entfernen
+              </button>
+            </div>
+
+            @if (category.items.length === 0) {
+              <p class="muted-text">Keine Speisen in dieser Kategorie.</p>
+            }
+
+            @if (category.items.length > 0) {
+              <div class="menu-items">
+                @for (item of category.items; track $index; let itemIndex = $index) {
+                  <div class="menu-item-row">
+                    <div>
+                      <strong>{{ item.name }}</strong>
+
+                      @if (item.description) {
+                        <span>{{ item.description }}</span>
+                      }
+                    </div>
+
+                    <div class="menu-item-actions">
+                      <strong>{{ item.price | number:'1.2-2' }} €</strong>
+
+                      <button
+                        type="button"
+                        class="small-button"
+                        (click)="removeMenuItem(categoryIndex, itemIndex)"
+                      >
+                        Entfernen
+                      </button>
+                    </div>
+                  </div>
+                }
               </div>
             }
-          }
-
-          @if (!hasOpeningTimeForDay(day.value)) {
-            <em>Geschlossen</em>
-          }
-        </td>
-      </tr>
+          </article>
+        }
+      </div>
     }
-  </tbody>
-</table>
 
-<h3>Öffnungszeit hinzufügen</h3>
+    <div class="menu-editor-grid">
+      <div class="compact-form">
+        <h4>Kategorie hinzufügen</h4>
 
-<p>Wochentage:</p>
+        <label>
+          Kategoriename:
+          <input type="text" name="newCategoryName" [(ngModel)]="newCategoryName">
+        </label>
 
-@for (day of weekdays; track day.value) {
-  <label>
-    <input
-      type="checkbox"
-      name="weekday-{{ day.value }}"
-      [(ngModel)]="day.selected"
-    >
-    {{ day.label }}
-  </label>
-  <br>
-}
+        <button type="button" (click)="addCategory()">
+          Kategorie hinzufügen
+        </button>
+      </div>
 
-<label>
-  Öffnet um:
-  <input type="time" name="newOpensAt" [(ngModel)]="newOpensAt">
-</label>
-<br>
+      <div class="compact-form">
+        <h4>Speise hinzufügen</h4>
 
-<label>
-  Schließt um:
-  <input type="time" name="newClosesAt" [(ngModel)]="newClosesAt">
-</label>
-<br>
+        <div class="dish-grid">
+          <label>
+            Kategorie:
+            <select name="selectedCategoryIndex" [(ngModel)]="selectedCategoryIndex">
+              @for (category of menuCategories(); track $index; let categoryIndex = $index) {
+                <option [ngValue]="categoryIndex">{{ category.name }}</option>
+              }
+            </select>
+          </label>
 
-<button type="button" (click)="addOpeningTime()">
-  Öffnungszeit hinzufügen
-</button>
+          <label>
+            Name:
+            <input type="text" name="newItemName" [(ngModel)]="newItemName">
+          </label>
 
-@if (openingTimesMessage()) {
-  <p>{{ openingTimesMessage() }}</p>
-}
+          <label class="wide-field">
+            Beschreibung:
+            <input type="text" name="newItemDescription" [(ngModel)]="newItemDescription">
+          </label>
 
-<hr>
+          <label>
+            Preis:
+            <input type="number" name="newItemPrice" [(ngModel)]="newItemPrice">
+          </label>
+        </div>
 
-<h2>Speisekarte</h2>
+        <button type="button" (click)="addMenuItem()">
+          Speise hinzufügen
+        </button>
+      </div>
+    </div>
 
-@if (menuCategories().length === 0) {
-  <p>Noch keine Kategorien angelegt.</p>
-}
-
-@for (category of menuCategories(); track $index; let categoryIndex = $index) {
-  <h3>{{ category.name }}</h3>
-
-  <button type="button" (click)="removeCategory(categoryIndex)">
-    Kategorie entfernen
-  </button>
-
-  @if (category.items.length === 0) {
-    <p>Keine Speisen in dieser Kategorie.</p>
-  }
-
-  @if (category.items.length > 0) {
-    <ul>
-      @for (item of category.items; track $index; let itemIndex = $index) {
-        <li>
-          <strong>{{ item.name }}</strong>
-          - {{ item.price | number:'1.2-2' }} €
-          <br>
-          {{ item.description }}
-
-          <button type="button" (click)="removeMenuItem(categoryIndex, itemIndex)">
-            Entfernen
-          </button>
-        </li>
-      }
-    </ul>
-  }
-}
-
-<h3>Kategorie hinzufügen</h3>
-
-<label>
-  Kategoriename:
-  <input type="text" name="newCategoryName" [(ngModel)]="newCategoryName">
-</label>
-
-<button type="button" (click)="addCategory()">
-  Kategorie hinzufügen
-</button>
-
-<h3>Speise hinzufügen</h3>
-
-<label>
-  Kategorie:
-  <select name="selectedCategoryIndex" [(ngModel)]="selectedCategoryIndex">
-    @for (category of menuCategories(); track $index; let categoryIndex = $index) {
-      <option [ngValue]="categoryIndex">{{ category.name }}</option>
+    @if (menuMessage()) {
+      <p class="message">{{ menuMessage() }}</p>
     }
-  </select>
-</label>
-<br>
+  </section>
 
-<label>
-  Name:
-  <input type="text" name="newItemName" [(ngModel)]="newItemName">
-</label>
-<br>
+  <section class="submit-card">
+    @if (!response()) {
+      <button type="button" class="submit-button" (click)="registerRestaurant()">
+        Restaurant mit Öffnungszeiten und Speisekarte registrieren
+      </button>
+    }
 
-<label>
-  Beschreibung:
-  <input type="text" name="newItemDescription" [(ngModel)]="newItemDescription">
-</label>
-<br>
+    @if (response(); as registeredRestaurant) {
+      <div class="message success">
+        <strong>Restaurant wurde registriert.</strong>
+        <br>
+        Restaurant-ID: {{ registeredRestaurant.restaurantId }}
+        <br>
+        Änderungen an Öffnungszeiten und Speisekarte werden automatisch gespeichert.
+      </div>
+    }
 
-<label>
-  Preis:
-  <input type="number" name="newItemPrice" [(ngModel)]="newItemPrice">
-</label>
-<br>
-
-<button type="button" (click)="addMenuItem()">
-  Speise hinzufügen
-</button>
-
-@if (menuMessage()) {
-  <p>{{ menuMessage() }}</p>
-}
-
-<br>
-<br>
-
-@if (!response()) {
-  <button type="button" (click)="registerRestaurant()">
-    Restaurant mit Öffnungszeiten und Speisekarte registrieren
-  </button>
-}
-
-@if (response(); as registeredRestaurant) {
-  <h3>Restaurant wurde registriert</h3>
-  <p>Restaurant-ID: {{ registeredRestaurant.restaurantId }}</p>
-  <p>Änderungen an Öffnungszeiten und Speisekarte werden automatisch gespeichert.</p>
-}
-
-@if (errorMessage()) {
-  <p>{{ errorMessage() }}</p>
-}
+    @if (errorMessage()) {
+      <p class="message error">{{ errorMessage() }}</p>
+    }
+  </section>
+</section>

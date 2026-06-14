@@ -1,61 +1,80 @@
-<h2>Restaurants suchen</h2>
+<section class="restaurants-page">
+  <section class="search-panel">
+    <div class="search-header">
+      <h2>Restaurants suchen</h2>
+      <p>Suche Restaurants im Umkreis und öffne direkt die Speisekarte.</p>
+    </div>
 
-<label>
-  Latitude:
-  <input type="number" name="latitude" [(ngModel)]="latitude">
-</label>
-<br>
+    <div class="search-grid">
+      <label>
+        Latitude:
+        <input type="number" name="latitude" [(ngModel)]="latitude">
+      </label>
 
-<label>
-  Longitude:
-  <input type="number" name="longitude" [(ngModel)]="longitude">
-</label>
-<br>
+      <label>
+        Longitude:
+        <input type="number" name="longitude" [(ngModel)]="longitude">
+      </label>
 
-<label>
-  Radius in km:
-  <input type="number" name="radiusKm" [(ngModel)]="radiusKm">
-</label>
-<br>
+      <label>
+        Radius in km:
+        <input type="number" name="radiusKm" [(ngModel)]="radiusKm">
+      </label>
+    </div>
 
-<label>
-  <input type="checkbox" name="onlyOpenNow" [(ngModel)]="onlyOpenNow">
-  Nur aktuell geöffnete Restaurants anzeigen
-</label>
-<br>
+    <label class="checkbox-label">
+      <input type="checkbox" name="onlyOpenNow" [(ngModel)]="onlyOpenNow">
+      Nur aktuell geöffnete Restaurants anzeigen
+    </label>
 
-<button type="button" (click)="searchRestaurants()">
-  Restaurants im Umkreis suchen
-</button>
+    <div class="button-row">
+      <button type="button" (click)="searchRestaurants()">
+        Restaurants im Umkreis suchen
+      </button>
 
-<button type="button" (click)="useCurrentLocation()">
-  Aktuelle Position verwenden
-</button>
+      <button type="button" (click)="useCurrentLocation()">
+        Aktuelle Position verwenden
+      </button>
 
-<button type="button" (click)="loadAllRestaurants()">
-  Alle Restaurants anzeigen
-</button>
+      <button type="button" (click)="loadAllRestaurants()">
+        Alle Restaurants anzeigen
+      </button>
+    </div>
 
-@if (errorMessage()) {
-  <p>{{ errorMessage() }}</p>
-}
-
-<h3>Ergebnisse</h3>
-
-@if (restaurants().length === 0) {
-  <p>Keine Restaurants gefunden.</p>
-}
-
-@if (restaurants().length > 0) {
-  <ul>
-    @for (restaurant of restaurants(); track restaurant.id) {
-      <li>
-        <a [routerLink]="['/restaurants', restaurant.id, 'menu']">
-          <strong>{{ restaurant.name }}</strong>
-        </a>
-        <br>
-        {{ restaurant.street }}, {{ restaurant.postalCode }} {{ restaurant.city }}
-      </li>
+    @if (errorMessage()) {
+      <p class="message error">{{ errorMessage() }}</p>
     }
-  </ul>
-}
+  </section>
+
+  <section class="results-panel">
+    <div class="results-header">
+      <h3>Ergebnisse</h3>
+      <span>{{ restaurants().length }} Restaurants</span>
+    </div>
+
+    @if (restaurants().length === 0) {
+      <p class="empty-state">Keine Restaurants gefunden.</p>
+    }
+
+    @if (restaurants().length > 0) {
+      <div class="restaurant-grid">
+        @for (restaurant of restaurants(); track restaurant.id) {
+          <a
+            class="restaurant-card"
+            [routerLink]="['/restaurants', restaurant.id, 'menu']"
+          >
+            <div class="restaurant-initial">
+              {{ restaurant.name.charAt(0) }}
+            </div>
+
+            <div class="restaurant-info">
+              <strong>{{ restaurant.name }}</strong>
+              <span>{{ restaurant.street }}</span>
+              <span>{{ restaurant.postalCode }} {{ restaurant.city }}</span>
+            </div>
+          </a>
+        }
+      </div>
+    }
+  </section>
+</section>
