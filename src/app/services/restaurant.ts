@@ -1,12 +1,12 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Restaurant } from '../models/restaurant';
 import { MenuResponse } from '../models/menu';
 import {
   RegisterRestaurantRequest,
   RegisterRestaurantResponse,
 } from '../models/register-restaurant';
-import { 
+import {
   OpeningTimeResponse,
   UpdateOpeningTimesRequest,
 } from '../models/opening-time';
@@ -22,8 +22,27 @@ export class RestaurantService {
     return this.http.get<Restaurant[]>(`${this.apiUrl}/restaurants`);
   }
 
+  searchRestaurants(
+    latitude: number,
+    longitude: number,
+    radiusKm: number,
+    onlyOpenNow: boolean
+  ) {
+    const params = new HttpParams()
+      .set('latitude', latitude)
+      .set('longitude', longitude)
+      .set('radiusKm', radiusKm)
+      .set('onlyOpenNow', onlyOpenNow);
+
+    return this.http.get<Restaurant[]>(`${this.apiUrl}/restaurants/search`, {
+      params,
+    });
+  }
+
   getMenu(restaurantId: number) {
-    return this.http.get<MenuResponse>(`${this.apiUrl}/restaurants/${restaurantId}/menu`);
+    return this.http.get<MenuResponse>(
+      `${this.apiUrl}/restaurants/${restaurantId}/menu`
+    );
   }
 
   registerRestaurant(request: RegisterRestaurantRequest) {
@@ -49,7 +68,7 @@ export class RestaurantService {
       request,
       {
         headers: {
-          'x-Api-Key': apiKey,
+          'X-Api-Key': apiKey,
         },
       }
     );
